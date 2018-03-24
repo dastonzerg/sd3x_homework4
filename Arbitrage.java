@@ -1,12 +1,14 @@
 
 import java.util.*;
 import java.io.*;
+import java.lang.Math;
 
 /**
  * Arbitrage class
  *
  */
-public class Arbitrage {
+public class Arbitrage 
+{
 	
 	/**
 	 * 
@@ -22,15 +24,51 @@ public class Arbitrage {
 	 * 
 	 * If no arbitrage opportunity is present, you should output an empty list
 	 */
-	public static List<Integer> arbitrageOpportunity(String filename) throws IOException {
+  @SuppressWarnings("unchecked")
+	public static List<Integer> arbitrageOpportunity(String filename) throws IOException 
+	{
 		
 		//parses the input file into a list of exchange rates
 		//see the comments above readExchangeRates for details on its output
-		double[][] exchangeRates = readExchangeRates(filename);
+		double[][] logExchangeRates = readLogExchangeRates(filename);
+		int n=logExchangeRates.length;
+		LinkedList<Integer>[][] routeTrack=new LinkedList[n][n];
+		for(int row=0; row<=n-1; ++row)
+		{
+		  for(int col=0; col<=n-1; ++col)
+		  {
+  		  routeTrack[row][col]=new LinkedList<Integer>();
+		  }
+		}
 		
+		for(int i=0; i<=n-1; ++i)
+		{
+		  for(int row=0; row<=n-1; ++row)
+		  {
+		    for(int col=0; col<=n-1; ++col)
+		    {
+		      double largestSoFar=logExchangeRates[row][col];
+		      double current=logExchangeRates[row][i]+logExchangeRates[i][col];
+		      if(current>largestSoFar)
+		      {
+		        logExchangeRates[row][col]=current;
+		        routeTrack[row][col].addAll(routeTrack[row][i]);
+		        routeTrack[row][col].add(i);
+		        routeTrack[row][col].addAll(routeTrack[i][col]);
+		      }
+		      if(col==row && logExchangeRates[row][col]>0)
+		      {
+		        routeTrack[row][col].addFirst(row);
+		        routeTrack[row][col].add(col);
+		        return routeTrack[row][col];
+		      }
+		    }
+		  }
+		}
+		
+		return new LinkedList<Integer>();
 		//TODO: model the exchange rates as a graph and output the value of
 		//an arbitrage opportunity (see the writeup)
-		return null;
 	}
 	
 	
@@ -45,7 +83,8 @@ public class Arbitrage {
 	 * I.e. if arr[i][j] = 4.00, then 1 quantity of currency i can be exchanged
 	 * for 4.00 quantities of currency j
 	 */
-	public static double[][] readExchangeRates(String filename) throws IOException {
+	public static double[][] readLogExchangeRates(String filename) throws IOException 
+	{
 		//System.out.println("starting to read exchange rates");
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		
@@ -55,11 +94,13 @@ public class Arbitrage {
 		
 		//parse the file as a 2d array
 		//in general, element j in row i has the exchange rate from country i to country j
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) 
+		{
 			String[] line = br.readLine().split(" ");
-			for (int j = 0; j < n; j++) {
+			for (int j = 0; j < n; j++) 
+			{
 				double rate = Double.parseDouble(line[j]);
-				exchangeRates[i][j] = rate;
+				exchangeRates[i][j] = Math.log(rate);
 			}
 		}
 		br.close();
