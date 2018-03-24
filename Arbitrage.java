@@ -2,6 +2,7 @@
 import java.util.*;
 import java.io.*;
 import java.lang.Math;
+import static java.lang.System.out;
 
 /**
  * Arbitrage class
@@ -52,9 +53,21 @@ public class Arbitrage
 		      if(current>largestSoFar)
 		      {
 		        logExchangeRates[row][col]=current;
+		        routeTrack[row][col].clear();
 		        routeTrack[row][col].addAll(routeTrack[row][i]);
 		        routeTrack[row][col].add(i);
 		        routeTrack[row][col].addAll(routeTrack[i][col]);
+//		        out.print("Row "+row+" to Col "+col+" adds: ");
+//		        for(int integer:routeTrack[row][i])
+//		        {
+//		          out.print(integer+" ");
+//		        }
+//		        out.print(i+" ");
+//		        for(int integer:routeTrack[i][col])
+//		        {
+//		          out.print(integer+" ");
+//		        }
+//		        out.println("end. The inter is: "+i);
 		      }
 		      if(col==row && logExchangeRates[row][col]>0)
 		      {
